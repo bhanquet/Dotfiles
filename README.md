@@ -9,6 +9,7 @@ gitdot commit -m "Add bashrc"
 gitdot push
 ```
 
+# Première fois
 ``` bash
 git init --bare $HOME/.dotfiles.git
 ```
