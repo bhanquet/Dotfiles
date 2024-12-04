@@ -1,83 +1,117 @@
 #!/bin/bash -i
 
-# Install GITDOT
-# ====================
+# Utility Functions
+# ==================
 
-echo ".dotfiles.git" >> ~/.gitignore
-
-
-git clone --bare https://github.com/bhanquet/Dotfiles.git $HOME/.dotfiles.git 2> /dev/null
-if [ $? -ne 0 ]; then
-	echo "Already installed"
-fi;
-
-function gitdot {
-    /usr/bin/git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME $@
+# Check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
 }
 
-gitdot checkout 2> /dev/null
-if [ $? = 0 ]; then
-    echo "Checked out config.";
-    else
-      mkdir -p .gitdot-backup
-      echo "Backing up pre-existing dot files.";
-      gitdot checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} bash -c 'mkdir -p .gitdot-backup/$(dirname {}) && mv {} .gitdot-backup/{}'
-      gitdot checkout
-fi;
+# Install packages using the appropriate package manager
+install_packages() {
+  local packages="$1"
+  echo "Installing packages: $packages"
 
-gitdot config status.showUntrackedFiles no
-
-# Install usefull app
-# ======================
-
-# Define the packages to install
-PACKAGES="build-essential vim tmux rsync xclip git"
-
-# Detect the package manager and install packages
-if command -v dnf >/dev/null 2>&1; then
+  if command_exists dnf; then
     echo "Detected Fedora. Installing packages..."
-    sudo dnf install -y $PACKAGES
-elif command -v pacman >/dev/null 2>&1; then
+    sudo dnf install -y $packages lua luarocks
+  elif command_exists pacman; then
     echo "Detected Arch Linux. Installing packages..."
-    sudo pacman -Sy --noconfirm $PACKAGES
-elif command -v apt >/dev/null 2>&1; then
+    sudo pacman -Sy --noconfirm $packages lua luarocks
+  elif command_exists apt; then
     echo "Detected Debian-based system. Installing packages..."
-    sudo apt update && sudo apt install -y $PACKAGES
-else
+    sudo apt update && sudo apt install -y $packages lua5.4 luarocks
+  else
     echo "Unsupported package manager. This script supports Fedora, Arch, and Debian-based distributions."
     exit 1
-fi
-
-# Confirm installation
-echo "Installation complete. Checking versions of installed packages:"
-
+  fi
+}
 
 # Install Homebrew if not already installed
-if ! command -v brew >/dev/null 2>&1; then
-    echo "Homebrew not found. Installing Homebrew..."
+install_homebrew() {
+  if ! command_exists brew; then
+    echo "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    echo >> $HOME/.bashrc
-    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.bashrc
+    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >>~/.bashrc
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-else
+  else
     echo "Homebrew is already installed."
+  fi
+}
+
+# Install Homebrew packages
+install_brew_packages() {
+  local brew_packages=("$@")
+  echo "Installing Homebrew packages: ${brew_packages[*]}"
+  for pkg in "${brew_packages[@]}"; do
+    if brew list "$pkg" >/dev/null 2>&1; then
+      echo "$pkg is already installed."
+    else
+      brew install "$pkg"
+    fi
+  done
+}
+
+# GITDOT Functions
+# =================
+
+# Check if GITDOT is installed
+is_gitdot_installed() {
+  git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME status >/dev/null 2>&1
+}
+
+# Set up GITDOT
+
+setup_gitdot() {
+  gitdot_() {
+    /usr/bin/git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME "$@"
+  }
+
+  echo "Setting up GITDOT..."
+  echo ".dotfiles.git" >>~/.gitignore
+
+  git clone --bare https://github.com/bhanquet/Dotfiles.git $HOME/.dotfiles.git || {
+    echo "Failed to clone GITDOT repository. Exiting."
+    return 1
+  }
+
+  if ! gitdot_ checkout; then
+    echo "Backing up existing dotfiles..."
+    mkdir -p .gitdot-backup
+    gitdot_ checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} bash -c 'mkdir -p .gitdot-backup/$(dirname {}) && mv {} .gitdot-backup/{}'
+    gitdot_ checkout
+  fi
+
+  gitdot_ config status.showUntrackedFiles no
+
+  echo "GITDOT setup complete."
+}
+
+# Main Script Logic
+# ==================
+
+# Install OS Packages (including Lua and LuaRocks)
+common_packages="build-essential curl vim tmux rsync xclip git bat"
+install_packages "$common_packages"
+
+# Install Homebrew and Brew Packages
+install_homebrew
+brew_packages=(gcc neovim ripgrep fd lazygit fzf tre-command)
+install_brew_packages "${brew_packages[@]}"
+
+# Install GITDOT if not already installed
+if is_gitdot_installed; then
+  echo "GITDOT is already installed."
+else
+  setup_gitdot
 fi
 
-# Update Homebrew
-echo "Updating Homebrew..."
-brew update
-
-# Install missing apps using Homebrew
-BREW_PACKAGES="gcc neovim ripgrep lazygit fzf tre-command"
-echo "Installing applications via Homebrew..."
-brew install $BREW_PACKAGES
-
-
-# App configuration
-# ======================
-
-# Git
+# Git Configuration
+echo "Setting up Git configuration..."
 git config --global user.name "Brian Hanquet"
 git config --global user.email "apps.brinat@pm.me"
 
+# Reload Shell Configuration
 source ~/.bashrc
+echo "Setup complete!"
