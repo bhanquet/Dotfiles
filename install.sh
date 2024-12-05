@@ -75,6 +75,7 @@ setup_gitdot() {
     return 1
   }
 
+  # Get the files from the repo. Backup if it already exists
   if ! gitdot_ checkout; then
     echo "Backing up existing dotfiles..."
     mkdir -p .gitdot-backup
@@ -82,6 +83,9 @@ setup_gitdot() {
     gitdot_ checkout
   fi
 
+  gitdot_ submodule update --init --recursive
+
+  # Git config
   gitdot_ config status.showUntrackedFiles no
 
   echo "GITDOT setup complete."
@@ -124,6 +128,5 @@ else
   echo "TPM already installed. Skipping installation."
 fi
 
-# Reload Shell Configuration
-source ~/.bashrc
 echo "Setup complete!"
+echo "You can type source ~/.bashrc to reload your shell configuration."
