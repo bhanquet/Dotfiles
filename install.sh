@@ -69,7 +69,6 @@ setup_gitdot() {
   }
 
   echo "Setting up GITDOT..."
-  echo ".dotfiles.git" >>~/.gitignore
 
   git clone --bare https://github.com/bhanquet/Dotfiles.git $HOME/.dotfiles.git || {
     echo "Failed to clone GITDOT repository. Exiting."
@@ -111,6 +110,19 @@ fi
 echo "Setting up Git configuration..."
 git config --global user.name "Brian Hanquet"
 git config --global user.email "apps.brinat@pm.me"
+
+# Install package manager in tmux
+TPM_DIR="$HOME/.tmux/plugins/tpm"
+
+# Check if tpm is already installed
+if [ ! -d "$TPM_DIR" ]; then
+  echo "TPM not found. Installing..."
+  git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+  "$TPM_DIR/bin/install_plugins"
+  echo "TPM installed and plugins initialized."
+else
+  echo "TPM already installed. Skipping installation."
+fi
 
 # Reload Shell Configuration
 source ~/.bashrc
