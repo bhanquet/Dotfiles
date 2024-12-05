@@ -15,13 +15,14 @@ install_packages() {
 
   if command_exists dnf; then
     echo "Detected Fedora. Installing packages..."
-    sudo dnf install -y $packages lua luarocks
+    sudo dnf -y groupinstall "Development Tools"
+    sudo dnf install -y $packages procps-ng lua luarocks
   elif command_exists pacman; then
     echo "Detected Arch Linux. Installing packages..."
-    sudo pacman -Sy --noconfirm $packages lua luarocks
+    sudo pacman -Sy --noconfirm $packages base-devel procps-ng lua luarocks
   elif command_exists apt; then
     echo "Detected Debian-based system. Installing packages..."
-    sudo apt update && sudo apt install -y $packages lua5.4 luarocks
+    sudo apt update && sudo apt install -y $packages build-essential procps lua5.4 luarocks
   else
     echo "Unsupported package manager. This script supports Fedora, Arch, and Debian-based distributions."
     exit 1
@@ -62,7 +63,6 @@ is_gitdot_installed() {
 }
 
 # Set up GITDOT
-
 setup_gitdot() {
   gitdot_() {
     /usr/bin/git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME "$@"
@@ -90,13 +90,13 @@ setup_gitdot() {
 # Main Script Logic
 # ==================
 
-# Install OS Packages (including Lua and LuaRocks)
-common_packages="build-essential curl vim tmux rsync xclip git bat"
-install_packages "$common_packages"
+# Install OS Packages
+common_packages="file curl vim tmux rsync xclip entr git bat"
+install_packages "$common_packages" # Install common packages + basic packages
 
 # Install Homebrew and Brew Packages
 install_homebrew
-brew_packages=(gcc neovim ripgrep fd lazygit fzf tre-command)
+brew_packages=(gcc node neovim ripgrep fd lazygit fzf tre-command)
 install_brew_packages "${brew_packages[@]}"
 
 # Install GITDOT if not already installed
