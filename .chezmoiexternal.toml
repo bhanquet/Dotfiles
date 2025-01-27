@@ -1,4 +1,4 @@
 [".config/nvim/"]
   type = "git-repo"
-  url = "git@github.com:bhanquet/neovim.git"
+  url = "https://github.com/bhanquet/neovim.git"
   refreshPeriod = "1h"
