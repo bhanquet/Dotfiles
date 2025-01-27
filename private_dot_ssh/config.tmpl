@@ -1,0 +1,19 @@
+Host github.com
+    HostName github.com
+    IdentityFile ~/.ssh/github_key
+
+{{ if (and (eq .chezmoi.hostname "IT00367") (eq .chezmoi.os "windows")) }}
+Host lnx-itx-script01
+        HostName lnx-itx-script01
+        User adminhanquet
+
+Host web.home
+        User brian
+        HostName 10.0.100.16
+        IdentityFile C:\Users\bhanquet\.ssh\rsa
+
+Host lnx-itx-web02
+        User it
+        HostName 10.180.50.19
+        IdentityFile C:\Users\bhanquet\.ssh\rsa
+{{ end }}
