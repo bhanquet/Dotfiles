@@ -1,4 +1,12 @@
+# Dynamically generated .chezmoiexternal.toml
+{{ if eq .chezmoi.os "windows" }}
+["AppData\\Local\\nvim"]
+  type = "git-repo"
+  url = "https://github.com/bhanquet/neovim.git"
+  refreshPeriod = "1h"
+{{ else if eq .chezmoi.os "linux" }}
 [".config/nvim/"]
   type = "git-repo"
   url = "https://github.com/bhanquet/neovim.git"
   refreshPeriod = "1h"
+{{ end }}
