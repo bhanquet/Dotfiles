@@ -3,3 +3,4 @@
 .bashrc
 .zsh
 {{ end }}
+**/node_modules
