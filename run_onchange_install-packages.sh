@@ -63,7 +63,7 @@ install_packages "$common_packages" # Install common packages + basic packages
 
 # Install Homebrew and Brew Packages
 install_homebrew
-brew_packages=(gcc node neovim ripgrep fd lazygit fzf tre-command)
+brew_packages=(gcc node neovim ripgrep fd lazygit fzf tre-command rtk anomalyco/tap/opencode)
 install_brew_packages "${brew_packages[@]}"
 
 # Install package manager in tmux
