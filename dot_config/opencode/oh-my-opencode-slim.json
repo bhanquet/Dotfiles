@@ -42,25 +42,24 @@
     },
     "opencode-go": {
       "orchestrator": {
-        "model": "opencode/muse-spark-1.3-contributor-free",
-        "variant": "thinking",
+        "model": "opencode-go/minimax-m3",
+        "variant": "high",
         "skills": ["*"],
         "mcps": ["*", "!context7"]
       },
       "oracle": {
-        "model": "opencode-go/qwen3.7-max",
-        "variant": "max",
+        "model": "opencode-go/qwen3.8-max",
+        "variant": "xhigh",
         "skills": ["simplify"],
         "mcps": []
       },
       "explorer": {
-        "model": "opencode-go/deepseek-v4-flash",
-        "variant": "high",
+        "model": "opencode/big-pickle",
         "skills": [],
         "mcps": []
       },
       "librarian": {
-        "model": "opencode-go/deepseek-v4-flash",
+        "model": "opencode-go/deepseek-v4.1-flash",
         "variant": "high",
         "skills": [],
         "mcps": ["context7", "gh_grep"]
@@ -71,13 +70,13 @@
         "mcps": []
       },
       "fixer": {
-        "model": "opencode-go/deepseek-v4-flash",
+        "model": "opencode-go/deepseek-v4.1-flash",
         "variant": "high",
         "skills": [],
         "mcps": []
       },
       "observer": {
-        "model": "opencode-go/mimo-v2.5",
+        "model": "opencode-go/space-bunny-free",
         "skills": [],
         "mcps": []
       }
