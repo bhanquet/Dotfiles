@@ -16,7 +16,7 @@ install_packages() {
 
   if command_exists dnf; then
     echo "Detected Fedora. Installing packages..."
-    sudo dnf -y group install "Development Tools"
+    sudo dnf -y group install "development-tools"
     sudo dnf install -y "${packages[@]}" procps-ng lua luarocks
   elif command_exists pacman; then
     echo "Detected Arch Linux. Installing packages..."
