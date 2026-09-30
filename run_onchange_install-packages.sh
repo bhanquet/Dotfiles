@@ -65,17 +65,7 @@ install_homebrew() {
     echo "Homebrew is already installed at $brew_path"
   fi
 
-  # Persist brew shellenv in ~/.bashrc (idempotent, marker-based)
-  touch ~/.bashrc
-  if ! grep -qsF '# chezmoi: brew shellenv' ~/.bashrc; then
-    {
-      echo ''
-      echo '# chezmoi: brew shellenv'
-      echo "eval \"\$($brew_path shellenv)\""
-    } >> ~/.bashrc
-  fi
-
-  # Ensure brew is available in the current shell
+  # Ensure brew is available in the current shell.
   eval "$("$brew_path" shellenv)"
 }
 
@@ -92,13 +82,41 @@ install_brew_packages() {
   done
 }
 
+# Install Fisher (fish plugin manager) and let it pick up the plugins listed
+# in the chezmoi-managed ~/.config/fish/fish_plugins. Idempotent.
+install_fisher() {
+  if ! command_exists fish; then
+    echo "Fish is not installed yet; skipping fisher install."
+    return
+  fi
+
+  if fish -c 'type -q fisher' >/dev/null 2>&1; then
+    echo "Fisher is already installed; updating plugins from fish_plugins."
+    fish -c 'fisher update' || echo "Warning: fisher update failed (run 'fisher update' manually)."
+  else
+    echo "Installing Fisher (fish plugin manager)..."
+    fish -c 'curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher'
+    echo "Installing plugins from fish_plugins..."
+    fish -c 'fisher update' || echo "Warning: fisher update failed (run 'fisher update' manually)."
+  fi
+}
+
 # Main Script Logic
 # ==================
 
 # Pre-flight: required tools
-command_exists sudo || { echo "sudo is required" >&2; exit 1; }
-command_exists curl || { echo "curl is required for Homebrew" >&2; exit 1; }
-command_exists git  || { echo "git is required" >&2; exit 1; }
+command_exists sudo || {
+  echo "sudo is required" >&2
+  exit 1
+}
+command_exists curl || {
+  echo "curl is required for Homebrew" >&2
+  exit 1
+}
+command_exists git || {
+  echo "git is required" >&2
+  exit 1
+}
 sudo -v
 
 # Install OS packages
@@ -107,8 +125,11 @@ install_packages "${common_packages[@]}"
 
 # Install Homebrew and Brew packages
 install_homebrew
-brew_packages=(gcc node neovim ripgrep fd lazygit fzf tre-command rtk)
+brew_packages=(gcc node neovim ripgrep fd lazygit fzf tre-command rtk fish)
 install_brew_packages "${brew_packages[@]}"
+
+# Install Fisher (fish plugins)
+install_fisher
 
 # Install TPM (Tmux Plugin Manager)
 TPM_DIR="$HOME/.tmux/plugins/tpm"
@@ -122,4 +143,4 @@ else
 fi
 
 echo "Setup complete!"
-echo "You can type source ~/.bashrc to reload your shell configuration."
+echo "Fish is your default shell. Open a new terminal session (or run 'exec fish') to start using it."

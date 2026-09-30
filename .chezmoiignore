@@ -1,10 +1,15 @@
 {{ if ne .chezmoi.os "linux" }}
 .tmux.conf
-.bashrc
-.zsh
 {{ end }}
 **/node_modules
 *.bak
 *.tmp
 **/package-lock.json
 **/.oh-my-opencode-slim/
+# Fish: fichiers générés par fisher / tide / fish lui-même
+**/.config/fish/functions/
+**/.config/fish/completions/
+**/.config/fish/themes/
+**/.config/fish/conf.d/
+**/.config/fish/fish_variables
+**/.config/fish/fish_history
