@@ -125,7 +125,7 @@ install_packages "${common_packages[@]}"
 
 # Install Homebrew and Brew packages
 install_homebrew
-brew_packages=(gcc node neovim ripgrep fd lazygit fzf tre-command rtk fish)
+brew_packages=(gcc node neovim ripgrep fd lazygit fzf tre-command rtk fish zoxide)
 install_brew_packages "${brew_packages[@]}"
 
 # Install Fisher (fish plugins)
