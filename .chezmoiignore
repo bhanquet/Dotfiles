@@ -4,3 +4,7 @@
 .zsh
 {{ end }}
 **/node_modules
+*.bak
+*.tmp
+**/package-lock.json
+**/.oh-my-opencode-slim/

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "update": "auto",
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": ["npx", "@playwright/mcp@latest"],
+        "disabled": true
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "headers": {
+          "Authorization": "Bearer {{ .context7_token }}"
+        },
+        "disabled": false
+      }
+    }
+  },
+  "plugins": [
+    "oh-my-opencode-slim@2.2.20",
+    "./plugins/rtk.ts"
+  ],
+  "agents": {
+    "explore": { "disabled": true },
+    "general": { "disabled": true }
+  }
+}
