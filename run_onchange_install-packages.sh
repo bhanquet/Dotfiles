@@ -29,7 +29,7 @@ BASE_PACKAGES=(file curl tmux git bat neovim ripgrep fzf fish zoxide luarocks)
 case "$PKG" in
   dnf)    BASE_PACKAGES+=(vim-enhanced fd-find) ;;  # Fedora does not ship vim/fd under their usual names.
   pacman) BASE_PACKAGES+=(vim fd) ;;
-  apt)    BASE_PACKAGES+=(vim fd-find) ;;           # apt: vim is fine, fd is fd-find.
+  apt)    BASE_PACKAGES+=(vim fd-find software-properties-common) ;;  # software-properties-common provides add-apt-repository.
 esac
 OPTIONAL_PACKAGES=(lazygit)  # Not in Fedora repos; older Debian/Ubuntu may lack it.
 
@@ -61,6 +61,15 @@ ensure_lazygit_copr() {
   [[ $PKG == dnf ]] || return 0
   dnf repolist 2>/dev/null | grep -q "dejan:lazygit" && return 0
   $SUDO dnf copr enable -y dejan/lazygit || warn "could not enable the lazygit COPR."
+}
+
+# Ubuntu/Debian's nvim lags upstream. ppa:neovim-ppa/stable tracks tags that are
+# more recent than what the official repos ship. Idempotent: the repo file
+# survives across runs, and `add-apt-repository` is a no-op when present.
+ensure_neovim_ppa() {
+  [[ $PKG == apt ]] || return 0
+  grep -Rqs "neovim-ppa" /etc/apt/sources.list.d/ 2>/dev/null && return 0
+  $SUDO add-apt-repository -y ppa:neovim-ppa/stable || warn "could not enable the neovim PPA."
 }
 
 # On apt, fd is called fdfind and bat is called batcat → shims under ~/.local/bin.
@@ -113,6 +122,7 @@ install_tpm() {
 
 echo "Installing via $PKG ($ID): ${BASE_PACKAGES[*]}"
 ensure_lazygit_copr
+ensure_neovim_ppa
 refresh
 install "${BASE_PACKAGES[@]}"
 
