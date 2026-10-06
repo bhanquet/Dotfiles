@@ -1,0 +1,9 @@
+# ~/.ssh/config
+#
+# Named `private_config.tmpl` on purpose: the `private_` attribute applies only
+# to the entry it is attached to. `private_dot_ssh/private_config.tmpl` secures
+# the directory (0700) but NOT the file — the old name left this at 0644.
+
+Host github.com
+    HostName github.com
+    IdentityFile ~/.ssh/github_key

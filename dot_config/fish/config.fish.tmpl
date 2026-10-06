@@ -2,19 +2,18 @@ if status is-interactive
     # Commands to run in interactive sessions can go here
 end
 
-# Homebrew (équivalent de `eval "$(brew shellenv)"`)
-if test -x /home/linuxbrew/.linuxbrew/bin/brew
-    eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+# Chemins prioritaires (prepend). Répertoires optionnels : `test -d` évite
+# d'appeler fish_add_path sur un chemin absent, ce qui le ferait renvoyer 1.
+for dir in \
+    {{ .chezmoi.homeDir }}/.opencode/bin \
+    {{ .chezmoi.homeDir }}/.local/bin \
+    {{ .chezmoi.homeDir }}/.local/share/pnpm \
+    {{ .chezmoi.homeDir }}/bin
+    test -d $dir; and fish_add_path -m $dir
 end
 
 # zoxide (smarter cd)
 zoxide init fish | source
-
-# Chemins prioritaires (prepend)
-fish_add_path -m /home/brian/.opencode/bin
-fish_add_path -m /home/brian/.local/bin
-fish_add_path -m /home/brian/.local/share/pnpm
-fish_add_path -m /home/brian/bin
 
 set -U fish_greeting ""
 
@@ -24,7 +23,6 @@ alias g='git'
 alias gs='git status'
 alias ga='git add'
 alias gc='git commit'
-alias gp='git push'
 alias gp='git push'
 alias gd='git diff'
 alias lg='lazygit'
@@ -54,9 +52,9 @@ end
 alias v='nvim'
 ## Ouvrir un projet dans nvim
 function vp
-    set dir (fd . ~/projects -d 1 -t d | xargs -n1 basename | fzf)
+    set dir (fd . {{ .chezmoi.homeDir }}/projects -d 1 -t d | xargs -n1 basename | fzf)
 
-    test -n "$dir"; and nvim ~/projects/$dir
+    test -n "$dir"; and nvim {{ .chezmoi.homeDir }}/projects/$dir
 end
 
 ## Ouvrir un fichier dans nvim

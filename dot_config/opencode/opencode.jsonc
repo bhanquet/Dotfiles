@@ -11,14 +11,11 @@
       "context7": {
         "type": "remote",
         "url": "https://mcp.context7.com/mcp",
-        "headers": {
-          "Authorization": "Bearer {{ .context7_token }}",
-        },
         "disabled": true,
       },
     },
   },
-  "plugins": ["./plugins/rtk.ts", "oh-my-opencode-slim"],
+  "plugins": ["oh-my-opencode-slim"],
   "agents": {
     "explore": { "disabled": true },
     "general": { "disabled": true },
