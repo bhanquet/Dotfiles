@@ -63,15 +63,6 @@ ensure_lazygit_copr() {
   $SUDO dnf copr enable -y dejan/lazygit || warn "could not enable the lazygit COPR."
 }
 
-# Ubuntu/Debian's nvim lags upstream. ppa:neovim-ppa/stable tracks tags that are
-# more recent than what the official repos ship. Idempotent: the repo file
-# survives across runs, and `add-apt-repository` is a no-op when present.
-ensure_neovim_ppa() {
-  [[ $PKG == apt ]] || return 0
-  grep -Rqs "neovim-ppa" /etc/apt/sources.list.d/ 2>/dev/null && return 0
-  $SUDO add-apt-repository -y ppa:neovim-ppa/stable || warn "could not enable the neovim PPA."
-}
-
 # On apt, fd is called fdfind and bat is called batcat → shims under ~/.local/bin.
 ensure_debian_shims() {
   [[ $PKG == apt ]] || return 0
@@ -120,9 +111,40 @@ install_tpm() {
   fi
 }
 
+# Generate a dedicated SSH key for GitHub (~/.ssh/github_key) if absent.
+# Idempotent: existing keys are kept. Add the public key to https://github.com/settings/keys.
+ensure_github_ssh_key() {
+  local key_path="$HOME/.ssh/github_key"
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+  if [[ -f "$key_path" ]]; then
+    echo "SSH key already present: $key_path (skipped)."
+    return 0
+  fi
+  local email
+  email=$(git config --global user.email 2>/dev/null || true)
+  if [[ -z $email ]]; then
+    email="${USER}@$(hostname)"
+  fi
+  ssh-keygen -t ed25519 -C "$email" -f "$key_path" -N ""
+  chmod 600 "$key_path"
+  chmod 644 "${key_path}.pub"
+  cat <<EOF
+
+GitHub SSH key generated:
+  private: $key_path
+  public:  ${key_path}.pub
+
+Add the public key to GitHub:
+  https://github.com/settings/keys
+
+Fingerprint:
+$(ssh-keygen -lf "${key_path}.pub")
+EOF
+}
+
 echo "Installing via $PKG ($ID): ${BASE_PACKAGES[*]}"
 ensure_lazygit_copr
-ensure_neovim_ppa
 refresh
 install "${BASE_PACKAGES[@]}"
 
@@ -133,5 +155,6 @@ ensure_debian_shims
 install_fisher
 set_default_shell
 install_tpm
+ensure_github_ssh_key
 
 echo "Done. Fish is your login shell; log out and back in (or 'exec fish')."
